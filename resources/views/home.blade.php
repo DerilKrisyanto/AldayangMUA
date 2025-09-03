@@ -266,11 +266,11 @@
                                 <svg class="h-5 w-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                                 </svg>
-                                <span class="text-gray-700">Home Service / Visit seluruh wilayah makassar</span>
+                                <span class="text-gray-700">Home Service / Visit wilayah makassar</span>
                             </li>
                         </ul>
-                        <button class="w-full bg-pink-500 text-white py-2 rounded-md hover:bg-pink-600 transition" onclick="document.querySelector('#booking').scrollIntoView({ behavior: 'smooth' });">
-                            Pesan Sekarang
+                        <button class="w-full bg-pink-500 text-white py-2 rounded-md hover:bg-pink-600 transition mt-6"
+                                onclick="document.querySelector('#booking').scrollIntoView({ behavior: 'smooth' });">Pesan Sekarang
                         </button>
                     </div>
                 </div>
@@ -311,11 +311,11 @@
                                 <svg class="h-5 w-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                                 </svg>
-                                <span class="text-gray-700">Home Service / Visit seluruh wilayah makassar</span>
+                                <span class="text-gray-700">Home Service / Visit wilayah makassar</span>
                             </li>
                         </ul>
-                        <button class="w-full bg-pink-500 text-white py-2 rounded-md hover:bg-pink-600 transition" onclick="document.querySelector('#booking').scrollIntoView({ behavior: 'smooth' });">
-                            Pesan Sekarang
+                        <button class="w-full bg-pink-500 text-white py-2 rounded-md hover:bg-pink-600 transition mt-6"
+                                onclick="document.querySelector('#booking').scrollIntoView({ behavior: 'smooth' });">Pesan Sekarang
                         </button>
                     </div>
                 </div>
@@ -353,12 +353,13 @@
                                 <svg class="h-5 w-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                                 </svg>
-                                <span class="text-gray-700">Home Service / Visit seluruh wilayah makassar</span>
+                                <span class="text-gray-700">Home Service / Visit wilayah makassar</span>
                             </li>
                         </ul>
-                        <button class="w-full bg-pink-500 text-white py-2 rounded-md hover:bg-pink-600 transition" onclick="document.querySelector('#booking').scrollIntoView({ behavior: 'smooth' });">
-                            Pesan Sekarang
+                        <button class="w-full bg-pink-500 text-white py-2 rounded-md hover:bg-pink-600 transition mt-6"
+                            onclick="document.querySelector('#booking').scrollIntoView({ behavior: 'smooth' });">Pesan Sekarang
                         </button>
+
                     </div>
                 </div>
             </div>
@@ -421,7 +422,7 @@
                                             </option>
                                         @endforeach
                                     </select>
-                                    <button type="button" onclick="addService()" class="px-4 py-2 bg-pink-500 text-white rounded">+</button>
+                                    <button type="button" onclick="addService()" class="px-4 py-2 bg-pink-500 text-white rounded-md hover:bg-pink-600 transition">+</button>
                                 </div>
                                 <div id="selectedServices" class="mt-2 text-sm text-gray-700"></div>
                             </div>
@@ -437,7 +438,7 @@
                                             </option>
                                         @endforeach
                                     </select>
-                                    <button type="button" onclick="addAdditional()" class="px-4 py-2 bg-pink-500 text-white rounded">+</button>
+                                    <button type="button" onclick="addAdditional()" class="px-4 py-2 bg-pink-500 text-white rounded-md hover:bg-pink-600 transition">+</button>
                                 </div>
                                 <div id="selectedAdditionals" class="mt-2 text-sm text-gray-700"></div>
                             </div>
@@ -464,7 +465,7 @@
 
                         <!-- Preview dan Total -->
                         <div class="bg-gray-100 p-4 rounded mt-4">
-                            <h4 class="font-semibold text-lg mb-2">Ringkasan Pilihan</h4>
+                            <h4 class="font-semibold text-lg mb-2">Ringkasan Layanan :</h4>
                             <ul id="summaryList" class="text-sm space-y-1 text-gray-800"></ul>
                             <div class="mt-2 font-bold">Total Harga: <span id="totalHarga">Rp 0</span></div>
                         </div>
@@ -654,11 +655,11 @@
                 <!-- Contact Method 1 -->
                 <div class="text-center">
                     <div class="bg-pink-100 w-16 h-16 mx-auto rounded-full flex items-center justify-center mb-4">
-                        <svg class="w-8 h-8 text-pink-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path>
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8 text-pink-500" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M12.004 2.003c-5.523 0-10 4.477-10 10 0 1.773.464 3.51 1.345 5.037L2 22l5.152-1.332A9.953 9.953 0 0 0 12.004 22c5.523 0 10-4.477 10-10s-4.477-9.997-10-9.997zm0 18a7.95 7.95 0 0 1-4.062-1.106l-.291-.172-3.055.791.805-2.982-.189-.305A7.953 7.953 0 0 1 4.004 12c0-4.411 3.589-8 8-8 4.411 0 8 3.589 8 8s-3.589 8.003-8 8.003zm4.317-5.528c-.236-.118-1.393-.688-1.609-.768-.216-.08-.373-.118-.53.118s-.61.768-.748.926c-.137.157-.275.177-.511.059-.236-.118-.997-.366-1.897-1.168-.701-.624-1.175-1.396-1.313-1.633-.137-.236-.015-.364.104-.482.106-.105.236-.275.354-.413.118-.138.157-.236.236-.393.079-.157.04-.295-.02-.413-.059-.118-.53-1.275-.727-1.748-.191-.456-.384-.394-.53-.402l-.452-.008c-.157 0-.413.059-.63.295-.216.236-.826.807-.826 1.968s.846 2.282.964 2.438c.118.157 1.664 2.539 4.038 3.558.564.243 1.004.389 1.347.498.566.18 1.08.155 1.487.094.454-.068 1.393-.569 1.59-1.118.197-.55.197-1.02.138-1.118-.059-.098-.216-.157-.452-.275z"/>
                         </svg>
                     </div>
-                    <h3 class="text-xl font-semibold text-gray-800 mb-2">Telepon</h3>
+                    <h3 class="text-xl font-semibold text-gray-800 mb-2">WhatsApp</h3>
                     <p class="text-gray-600">+62 813-4352-4470</p>
                 </div>
                 
@@ -735,7 +736,7 @@
                 </div>
                 
                 <div>
-                    <h4 class="text-lg font-semibold mb-4">Menu Cepat</h4>
+                    <h4 class="text-lg font-semibold mb-4">Daftar Menu</h4>
                     <ul class="space-y-2">
                         <li><a href="#home" class="text-gray-300 hover:text-white transition">Beranda</a></li>
                         <li><a href="#services" class="text-gray-300 hover:text-white transition">Layanan</a></li>
@@ -746,7 +747,7 @@
                 </div>
                 
                 <div>
-                    <h4 class="text-lg font-semibold mb-4">Jam Buka</h4>
+                    <h4 class="text-lg font-semibold mb-4">Jam Pelayanan Studio</h4>
                     <ul class="space-y-2 text-gray-300">
                         <li class="flex justify-between"><span>Senin</span> <span>10:00 - 18:00</span></li>
                         <li class="flex justify-between"><span>Selasa</span> <span>10:00 - 18:00</span></li>
