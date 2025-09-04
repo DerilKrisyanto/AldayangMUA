@@ -490,135 +490,120 @@
         </div>
     </section>
 
-    <!-- Pop-up Pilih Metode Pembayaran -->
+    <!-- Pop-up Konfirmasi -->
     <div id="paymentPopup" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 hidden z-50">
         <div class="bg-white rounded-2xl shadow-lg p-8 w-96 max-w-[90%] text-center">
-            <h3 class="text-xl font-semibold mb-6">Pilih Metode Pembayaran</h3>
+            <h3 class="text-xl font-semibold mb-6">Konfirmasi Pemesanan</h3>
             <div class="flex flex-col gap-4">
-                <button id="btnBayarDisini" 
-                        class="px-4 py-2 bg-blue-600 text-white rounded-lg">
-                    Bayar Disini
-                </button>
                 <button id="btnBayarWA"
-                    class="w-full px-4 py-3 bg-gray-700 text-white rounded-lg hover:bg-gray-800 transition">
-                    Bayar via WhatsApp Admin
+                    class="w-full px-4 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition">
+                    Lanjutkan via WhatsApp
+                </button>
+                <button id="btnClosePopup"
+                    class="w-full px-4 py-3 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition">
+                    Tutup
                 </button>
             </div>
         </div>
     </div>
-    <script type="text/javascript" >
-        document.addEventListener("DOMContentLoaded", function () {
-            const bookingForm = document.getElementById("appointment-form");
-            const popup = document.getElementById("paymentPopup");
-            const btnBayarDisini = document.getElementById("btnBayarDisini");
-            const btnBayarWA = document.getElementById("btnBayarWA");
 
-            let lastBookingId = null;
-            let lastTotal = 0;
+    <script>
+document.addEventListener("DOMContentLoaded", function () {
+    const bookingForm = document.getElementById("appointment-form");
+    const popup = document.getElementById("paymentPopup");
+    const btnBayarWA = document.getElementById("btnBayarWA");
+    const btnClosePopup = document.getElementById("btnClosePopup");
 
-            bookingForm.addEventListener("submit", function (e) {
-                e.preventDefault();
+    // intercept submit
+    bookingForm.addEventListener("submit", function (e) {
+        e.preventDefault(); // cegah reload
 
-                const formData = new FormData(bookingForm);
+        const formData = new FormData(bookingForm);
 
-                // simpan booking ke DB
-                fetch(bookingForm.action, {
-                    method: "POST",
-                    body: formData,
-                    headers: {
-                        "X-CSRF-TOKEN": document.querySelector('input[name="_token"]').value,
-                        "Accept": "application/json"
-                    }
-                })
-                .then(async (res) => {
-                    const data = await res.json().catch(() => ({}));
-                    if (!res.ok) {
-                        const msg = data.message || "Gagal menyimpan booking.";
-                        alert(msg);
-                        throw new Error(msg);
-                    }
-                    return data;
-                })
-                .then(data => {
-                    if (data.success) {
-                        // simpan untuk dipakai saat createTransaction
-                        lastBookingId = data.booking_id;
-                        lastTotal = data.total;
-
-                        // tampilkan popup setelah booking tersimpan
-                        popup.classList.remove("hidden");
-                    } else {
-                        alert(data.message || "Gagal menyimpan booking.");
-                    }
-                })
-                .catch(err => console.error(err));
-            });
-
-            // Bayar Disini (Midtrans)
-            btnBayarDisini.addEventListener("click", function(e) {
-                e.preventDefault();
-                popup.classList.add("hidden"); // tutup popup pilih metode
-
-                fetch("{{ route('payments.snapToken') }}", {
-                    method: "POST",
-                    headers: {
-                        "X-CSRF-TOKEN": document.querySelector('input[name="_token"]').value,
-                        "Content-Type": "application/json",
-                        "Accept": "application/json"
-                    },
-                    body: JSON.stringify({
-                        booking_id: lastBookingId,
-                        name: document.getElementById("name").value,
-                        phone: document.getElementById("phone").value,
-                        totalharga: lastTotal
-                    }),
-                })
-                .then(async (res) => {
-                    const data = await res.json().catch(() => ({}));
-                    if (!res.ok) {
-                        const msg = data.message || "Gagal dapat token.";
-                        alert(msg);
-                        throw new Error(msg);
-                    }
-                    return data;
-                })
-                .then(data => {
-                    if (data.status && data.snapToken) {
-                        snap.pay(data.snapToken, {
-                            onSuccess: function(result){
-                                alert("Pembayaran sukses!");
-                                console.log(result);
-                            },
-                            onPending: function(result){
-                                alert("Menunggu pembayaran...");
-                                console.log(result);
-                            },
-                            onError: function(result){
-                                alert("Pembayaran gagal!");
-                                console.log(result);
-                            },
-                            onClose: function(){
-                                alert("Anda menutup popup tanpa menyelesaikan pembayaran");
-                            }
-                        });
-                    } else {
-                        alert("Gagal dapat token: " + (data.message ?? "-"));
-                    }
-                })
-                .catch(err => console.error(err));
-            });
-
-            // Bayar via WhatsApp
-            btnBayarWA.addEventListener("click", function () {
-                popup.classList.add("hidden");
-                const noAdmin = "6281343524470";
-                const pesan = encodeURIComponent(
-                    "Halo Admin, saya ingin konfirmasi janji temu. Kode booking: " + (lastBookingId ?? "-")
-                );
-                window.open(`https://wa.me/${noAdmin}?text=${pesan}`, "_blank");
-            });
+        fetch(bookingForm.action, {
+            method: "POST",
+            body: formData,
+            headers: {
+                "X-CSRF-TOKEN": document.querySelector('input[name="_token"]').value,
+                "Accept": "application/json"
+            }
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                popup.classList.remove("hidden"); // tampilkan popup
+            } else {
+                alert("Gagal menyimpan booking!");
+            }
+        })
+        .catch(err => {
+            console.error("Error:", err);
+            alert("Terjadi kesalahan.");
         });
-    </script>
+    });
+
+    // tombol lanjutkan via WA
+    btnBayarWA.addEventListener("click", function () {
+        popup.classList.add("hidden");
+
+        const name = document.getElementById("name").value;
+        const phone = document.getElementById("phone").value;
+        const date = document.getElementById("date").value;
+        const time = document.getElementById("time").value;
+        const alamat = document.getElementById("alamat").value;
+        const alamatmaps = document.getElementById("alamatmaps").value || "-";
+        const notes = document.getElementById("notes").value || "-";
+
+        const layanan = [];
+        document.querySelectorAll("#summaryList li").forEach(li => {
+            layanan.push("- " + li.textContent);
+        });
+        const layananText = layanan.length > 0 ? layanan.join("\n") : "-";
+
+        const pesan = 
+`*Halo Kak, berikut ringkasan data booking yang kami terima*
+*Nama* : ${name}
+*No.Telp* : ${phone}
+*Tanggal* : ${date} ${time}
+*Alamat* : ${alamat}
+*Maps* : ${alamatmaps}
+*Jenis Layanan* :
+${layananText}
+*Permintaan Khusus* :
+${notes}
+*Terima Kasih telah melakukan pemesanan.*`;
+
+        fetch("{{ route('send-wa') }}", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRF-TOKEN": document.querySelector('input[name="_token"]').value
+            },
+            body: JSON.stringify({
+                target: phone, 
+                message: pesan,
+                sender: "081343524470" // nomor admin
+            })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.status) {
+                alert("Pesan berhasil dikirim ke WhatsApp admin via Fonnte!");
+                window.location.href = "{{ route('home') }}"; // redirect ke home
+            } else {
+                alert("Gagal mengirim pesan WhatsApp.");
+                console.error(data);
+            }
+        })
+        .catch(err => console.error("Error:", err));
+    });
+
+    // tombol tutup popup
+    btnClosePopup.addEventListener("click", function () {
+        popup.classList.add("hidden");
+    });
+});
+</script>
 
     <!-- Modal Syarat dan Ketentuan -->
     <div id="termsModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center hidden">
@@ -711,7 +696,7 @@
                         </a>
                         
                         <!-- Instagram -->
-                        <a href="https://www.instagram.com/aldayang.mua?igsh=MXdoOG54emk0Ymg2dg==" target="_blank" class="hover:opacity-80 transition">
+                        <a href="https://www.instagram.com/makeupby.aldayang?igsh=MXdoOG54emk0Ymg2dg==" target="_blank" class="hover:opacity-80 transition">
                             <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8 text-pink-500" viewBox="0 0 24 24" fill="currentColor">
                                 <path d="M12 2.2c3.2 0 3.6.01 4.9.07 3.3.15 4.8 1.7 4.9 4.9.06 1.3.07 1.6.07 4.9s-.01 3.6-.07 4.9c-.15 3.2-1.6 4.7-4.9 4.9-1.3.06-1.6.07-4.9.07s-3.6-.01-4.9-.07c-3.3-.15-4.7-1.6-4.9-4.9C2.21 15.6 2.2 15.3 2.2 12s.01-3.6.07-4.9c.15-3.2 1.6-4.7 4.9-4.9C8.4 2.21 8.8 2.2 12 2.2m0-2.2C8.7 0 8.3.01 7 .07 2.6.27.2 2.7.07 7 .01 8.3 0 8.7 0 12c0 3.3.01 3.7.07 5 .2 4.3 2.6 6.8 6.9 6.9 1.3.06 1.7.07 5 .07s3.7-.01 5-.07c4.3-.2 6.8-2.6 6.9-6.9.06-1.3.07-1.7.07-5 0-3.3-.01-3.7-.07-5-.2-4.3-2.6-6.8-6.9-6.9C15.7.01 15.3 0 12 0z"/>
                                 <path d="M12 5.8a6.2 6.2 0 1 0 0 12.4 6.2 6.2 0 0 0 0-12.4zm0 10.2a4 4 0 1 1 0-8 4 4 0 0 1 0 8z"/>
@@ -720,7 +705,7 @@
                         </a>
 
                         <!-- TikTok -->
-                        <a href="https://www.tiktok.com/@aldayang.mua?_t=ZS-8y2d1dK3TIm&_r=1" target="_blank" class="hover:opacity-80 transition">
+                        <a href="https://www.tiktok.com/@makeupby.aldayang?_t=ZS-8y2d1dK3TIm&_r=1" target="_blank" class="hover:opacity-80 transition">
                             <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 24 24">
                                 <path d="M16.5 1c.7 2.3 2.4 4 4.6 4.5v4.4c-1.7 0-3.4-.5-4.6-1.4v7.6c0 5.3-5.7 8.5-10.3 5.9-1.8-1.1-3-3-3.1-5.1-.1-3.4 2.5-6.2 5.9-6.2.6 0 1.1.1 1.7.3v4.6c-.5-.2-1-.3-1.5-.2-1.3.2-2.3 1.4-2.2 2.8.1 1.1.9 2 2 2.2 1.6.3 3-1 3-2.6V1h4.5z"/>
                             </svg>
@@ -802,9 +787,9 @@
             });
         });
         
-        // Set tanggal minimal untuk booking ke hari ini
+        // Set tanggal untuk booking
         const today = new Date().toISOString().split('T')[0];
-        document.getElementById('date').min = today;
+        document.getElementById('date').value = today;
         
         // Validasi form
         const appointmentForm = document.getElementById('appointment-form');
@@ -834,6 +819,7 @@
         //Form buat jadwal
         let total = 0;
         let count = 0;
+        let totalHarga = 0;
 
         function formatRupiah(number) {
             return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(number);

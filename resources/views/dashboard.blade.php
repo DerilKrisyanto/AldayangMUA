@@ -279,7 +279,7 @@
                                 </td>
                                 <td class="px-4 py-2">
                                     <div class="text-sm text-gray-900">{{ $booking->phone }}</div>
-                                    <div class="text-sm text-gray-500">{{ $booking->email ?? '-' }}</div>
+                                    <!-- <div class="text-sm text-gray-500">{{ $booking->email ?? '-' }}</div> -->
                                 </td>
                                 <td class="px-4 py-2 text-sm">
                                     @php

@@ -1,6 +1,8 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Http;
 use App\Http\Controllers\PageController;
 use App\Http\Controllers\BookingController;
 use App\Http\Controllers\GalleryController;
@@ -10,6 +12,22 @@ use App\Http\Controllers\PaymentController;
 Route::get('/', [PageController::class, 'home'])->name('home');
 Route::get('/bookings/create', [BookingController::class, 'create'])->name('bookings.create');
 Route::post('/bookings', [BookingController::class, 'store'])->name('bookings.store');
+
+Route::post('/send-wa', function (Request $request) {
+    $target = $request->input('target'); // nomor user
+    $message = $request->input('message');
+    $sender = $request->input('sender'); // admin WA
+
+    $response = Http::withHeaders([
+        'Authorization' => env('FONNTE_API_KEY'),
+    ])->post('https://api.fonnte.com/send', [
+        'target' => $target,
+        'message'=> $message,
+        // 'sender' => $sender, // jika akun Fonnte support multi-sender
+    ]);
+
+    return $response->json();
+})->name('send-wa');
 
 Route::post('/payments/snap-token', [PaymentController::class, 'getSnapToken'])->name('payments.snapToken');
 
