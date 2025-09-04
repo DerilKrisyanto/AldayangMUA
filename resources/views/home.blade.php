@@ -418,7 +418,7 @@
                                         <option value=""> Pilih Layanan </option>
                                         @foreach ($services as $service)
                                             <option value="{{ $service->id }}" data-harga="{{ $service->harga }}">
-                                                {{ $service->nama }} - IDR {{ number_format($service->harga, 0, ',', '.') }}
+                                                {{ $service->nama }} - Rp. {{ number_format($service->harga, 0, ',', '.') }}
                                             </option>
                                         @endforeach
                                     </select>
@@ -434,7 +434,7 @@
                                         <option value=""> Pilih Layanan Tambahan </option>
                                         @foreach ($additionals as $additional)
                                             <option value="{{ $additional->id }}" data-harga="{{ $additional->harga }}">
-                                                {{ $additional->nama }} - IDR {{ number_format($additional->harga, 0, ',', '.') }}
+                                                {{ $additional->nama }} - Rp. {{ number_format($additional->harga, 0, ',', '.') }}
                                             </option>
                                         @endforeach
                                     </select>
@@ -508,102 +508,114 @@
     </div>
 
     <script>
-document.addEventListener("DOMContentLoaded", function () {
-    const bookingForm = document.getElementById("appointment-form");
-    const popup = document.getElementById("paymentPopup");
-    const btnBayarWA = document.getElementById("btnBayarWA");
-    const btnClosePopup = document.getElementById("btnClosePopup");
+        document.addEventListener("DOMContentLoaded", function () {
+            const bookingForm = document.getElementById("appointment-form");
+            const popup = document.getElementById("paymentPopup");
+            const btnBayarWA = document.getElementById("btnBayarWA");
+            const btnClosePopup = document.getElementById("btnClosePopup");
 
-    // intercept submit
-    bookingForm.addEventListener("submit", function (e) {
-        e.preventDefault(); // cegah reload
+            // intercept submit
+            bookingForm.addEventListener("submit", function (e) {
+                e.preventDefault(); // cegah reload
 
-        const formData = new FormData(bookingForm);
+                const formData = new FormData(bookingForm);
 
-        fetch(bookingForm.action, {
-            method: "POST",
-            body: formData,
-            headers: {
-                "X-CSRF-TOKEN": document.querySelector('input[name="_token"]').value,
-                "Accept": "application/json"
+                fetch(bookingForm.action, {
+                    method: "POST",
+                    body: formData,
+                    headers: {
+                        "X-CSRF-TOKEN": document.querySelector('input[name="_token"]').value,
+                        "Accept": "application/json"
+                    }
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        popup.classList.remove("hidden"); // tampilkan popup
+                    } else {
+                        alert("Gagal menyimpan booking!");
+                    }
+                })
+                .catch(err => {
+                    console.error("Error:", err);
+                    alert("Terjadi kesalahan.");
+                });
+            });
+
+            // tombol lanjutkan via WA
+            btnBayarWA.addEventListener("click", function () {
+            popup.classList.add("hidden");
+
+            const name = document.getElementById("name").value;
+            const phone = document.getElementById("phone").value;
+            const date = document.getElementById("date").value;
+            const time = document.getElementById("time").value;
+            const alamat = document.getElementById("alamat").value;
+            const alamatmaps = document.getElementById("alamatmaps").value || "-";
+            const notes = document.getElementById("notes").value || "-";
+            const totalHarga = document.getElementById("totalHargaInput").value;
+
+            // kelompokkan layanan
+            const layananList = {};
+            document.querySelectorAll("#summaryList li .layanan-text").forEach(span => {
+                const text = span.textContent.replace("Jenis Layanan: ", "").replace("Layanan Tambahan: ", "");
+                layananList[text] = (layananList[text] || 0) + 1;
+            });
+
+            let layananText = "";
+            for (const [nama, count] of Object.entries(layananList)) {
+                layananText += `- ${nama}${count > 1 ? " (x" + count + ")" : ""}\n`;
             }
-        })
-        .then(res => res.json())
-        .then(data => {
-            if (data.success) {
-                popup.classList.remove("hidden"); // tampilkan popup
-            } else {
-                alert("Gagal menyimpan booking!");
-            }
-        })
-        .catch(err => {
-            console.error("Error:", err);
-            alert("Terjadi kesalahan.");
-        });
-    });
 
-    // tombol lanjutkan via WA
-    btnBayarWA.addEventListener("click", function () {
-        popup.classList.add("hidden");
+            const pesan = 
+`*Halo Kak,*
+*kami telah menerima jadwal pesanan anda dengan ringkasan sebagai berikut.*
 
-        const name = document.getElementById("name").value;
-        const phone = document.getElementById("phone").value;
-        const date = document.getElementById("date").value;
-        const time = document.getElementById("time").value;
-        const alamat = document.getElementById("alamat").value;
-        const alamatmaps = document.getElementById("alamatmaps").value || "-";
-        const notes = document.getElementById("notes").value || "-";
+Nama      : ${name}
+No.Telp   : ${phone}
+Tanggal   : ${date} ${time}
+Alamat    : ${alamat}
+Lokasi Maps : ${alamatmaps}
+Jenis Layanan :
+${layananText.trim()}
+Permintaan Khusus : ${notes}
 
-        const layanan = [];
-        document.querySelectorAll("#summaryList li").forEach(li => {
-            layanan.push("- " + li.textContent);
-        });
-        const layananText = layanan.length > 0 ? layanan.join("\n") : "-";
+Total     : Rp. ${new Intl.NumberFormat('id-ID').format(totalHarga)} ,-
 
-        const pesan = 
-`*Halo Kak, berikut ringkasan data booking yang kami terima*
-*Nama* : ${name}
-*No.Telp* : ${phone}
-*Tanggal* : ${date} ${time}
-*Alamat* : ${alamat}
-*Maps* : ${alamatmaps}
-*Jenis Layanan* :
-${layananText}
-*Permintaan Khusus* :
-${notes}
-*Terima Kasih telah melakukan pemesanan.*`;
+*Mohon konfirmasi kembali jika terdapat perubahan*
+_Terima kasih telah melakukan pemesanan._`;
 
-        fetch("{{ route('send-wa') }}", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "X-CSRF-TOKEN": document.querySelector('input[name="_token"]').value
-            },
-            body: JSON.stringify({
-                target: phone, 
-                message: pesan,
-                sender: "081343524470" // nomor admin
+            fetch("{{ route('send-wa') }}", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRF-TOKEN": document.querySelector('input[name="_token"]').value
+                },
+                body: JSON.stringify({
+                    target: phone, 
+                    message: pesan,
+                    sender: "081343524470"
+                })
             })
-        })
-        .then(res => res.json())
-        .then(data => {
-            if (data.status) {
-                alert("Pesan berhasil dikirim ke WhatsApp admin via Fonnte!");
-                window.location.href = "{{ route('home') }}"; // redirect ke home
-            } else {
-                alert("Gagal mengirim pesan WhatsApp.");
-                console.error(data);
-            }
-        })
-        .catch(err => console.error("Error:", err));
-    });
+            .then(res => res.json())
+            .then(data => {
+                if (data.status) {
+                    alert("Booking berhasil, Admin akan menghubungi anda via WhatsApp.");
+                    window.location.href = "{{ route('home') }}";
+                } else {
+                    alert("Terjadi Kesalahan, Gagal melakukan booking!");
+                    console.error(data);
+                }
+            })
+            .catch(err => console.error("Error:", err));
+        });
 
-    // tombol tutup popup
-    btnClosePopup.addEventListener("click", function () {
-        popup.classList.add("hidden");
-    });
-});
-</script>
+            // tombol tutup popup
+            btnClosePopup.addEventListener("click", function () {
+                popup.classList.add("hidden");
+            });
+        });
+    </script>
 
     <!-- Modal Syarat dan Ketentuan -->
     <div id="termsModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center hidden">
@@ -721,7 +733,7 @@ ${notes}
                 </div>
                 
                 <div>
-                    <h4 class="text-lg font-semibold mb-4">Daftar Menu</h4>
+                    <h4 class="text-lg font-semibold mb-4">Menu</h4>
                     <ul class="space-y-2">
                         <li><a href="#home" class="text-gray-300 hover:text-white transition">Beranda</a></li>
                         <li><a href="#services" class="text-gray-300 hover:text-white transition">Layanan</a></li>
@@ -732,7 +744,7 @@ ${notes}
                 </div>
                 
                 <div>
-                    <h4 class="text-lg font-semibold mb-4">Jam Pelayanan Studio</h4>
+                    <h4 class="text-lg font-semibold mb-4">Pelayanan Studio</h4>
                     <ul class="space-y-2 text-gray-300">
                         <li class="flex justify-between"><span>Senin</span> <span>10:00 - 18:00</span></li>
                         <li class="flex justify-between"><span>Selasa</span> <span>10:00 - 18:00</span></li>
@@ -834,8 +846,7 @@ ${notes}
             const label = selected.text;
             const harga = parseInt(selected.getAttribute('data-harga'));
 
-            addToSummary(`Jenis Layanan: ${label}`);
-            addHiddenField('service_types[]', id);
+            addToSummary(`Jenis Layanan: ${label}`, harga, 'service_types[]', id);
             addToTotal(harga);
         }
 
@@ -848,16 +859,58 @@ ${notes}
             const label = selected.text;
             const harga = parseInt(selected.getAttribute('data-harga'));
 
-            addToSummary(`Layanan Tambahan: ${label}`);
-            addHiddenField('additional_types[]', id);
+            addToSummary(`Layanan Tambahan: ${label}`, harga, 'additional_types[]', id);
             addToTotal(harga);
         }
 
-        function addToSummary(text) {
+        function addToSummary(text, harga, fieldName, fieldValue) {
             const list = document.getElementById('summaryList');
             const item = document.createElement('li');
-            item.textContent = text;
+            item.classList.add("flex", "justify-between", "items-center");
+
+            // isi teks (hanya untuk ringkasan & WA)
+            const span = document.createElement('span');
+            span.classList.add("layanan-text");
+            span.textContent = text;
+
+            // tombol hapus (hanya di web, tidak ikut ke WA)
+            const btn = document.createElement('button');
+            btn.textContent = "❌";
+            btn.classList.add("ml-2", "text-red-500", "hover:text-red-700", "text-xs");
+            btn.onclick = function () {
+                removeFromSummary(item, harga, hiddenInput);
+            };
+
+            item.appendChild(span);
+            item.appendChild(btn);
             list.appendChild(item);
+
+            // hidden input untuk form
+            const container = document.getElementById('hiddenFields');
+            const hiddenInput = document.createElement('input');
+            hiddenInput.type = 'hidden';
+            hiddenInput.name = fieldName;
+            hiddenInput.value = fieldValue;
+            container.appendChild(hiddenInput);
+
+            // simpan referensi input di item supaya bisa dihapus
+            item._hiddenInput = hiddenInput;
+        }
+
+        function removeFromSummary(item, harga, hiddenInput) {
+            // hapus dari ringkasan
+            item.remove();
+
+            // hapus hidden input
+            if (item._hiddenInput) {
+                item._hiddenInput.remove();
+            }
+
+            // kurangi total
+            total -= harga;
+            if (total < 0) total = 0;
+            document.getElementById('totalHarga').textContent = formatRupiah(total);
+            document.getElementById('totalHargaInput').value = total;
         }
 
         function addHiddenField(name, value) {

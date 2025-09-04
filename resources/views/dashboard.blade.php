@@ -291,7 +291,7 @@
                                     @endphp
                                     @foreach($groupedServices as $serviceName => $count)
                                         <div class="text-gray-900">
-                                            - {{ $serviceName }}{{ $count > 1 ? ' (' . $count . ')' : '' }}
+                                            - {{ $serviceName }}{{ $count > 1 ? ' (x' . $count . ')' : '' }}
                                         </div>
                                     @endforeach
                                 </td>
@@ -387,7 +387,7 @@
                                                 <option value=""> Pilih Layanan </option>
                                                 @foreach ($services as $service)
                                                     <option value="{{ $service->id }}" data-harga="{{ $service->harga }}">
-                                                        {{ $service->nama }} - IDR {{ number_format($service->harga, 0, ',', '.') }}
+                                                        {{ $service->nama }} - Rp {{ number_format($service->harga, 0, ',', '.') }}
                                                     </option>
                                                 @endforeach
                                             </select>
@@ -403,7 +403,7 @@
                                                 <option value=""> Pilih Layanan Tambahan </option>
                                                 @foreach ($additionals as $additional)
                                                     <option value="{{ $additional->id }}" data-harga="{{ $additional->harga }}">
-                                                        {{ $additional->nama }} - IDR {{ number_format($additional->harga, 0, ',', '.') }}
+                                                        {{ $additional->nama }} - Rp. {{ number_format($additional->harga, 0, ',', '.') }}
                                                     </option>
                                                 @endforeach
                                             </select>
@@ -559,9 +559,9 @@
         });
     });
     
-    // Set tanggal minimal untuk booking ke hari ini
+    // Set tanggal untuk booking
     const today = new Date().toISOString().split('T')[0];
-    document.getElementById('date').min = today;
+    document.getElementById('date').value = today;
     
     // Validasi form
     const appointmentForm = document.getElementById('appointment-form');
@@ -624,11 +624,53 @@
         addToTotal(harga);
     }
 
-    function addToSummary(text) {
+    function addToSummary(text, harga, fieldName, fieldValue) {
         const list = document.getElementById('summaryList');
         const item = document.createElement('li');
-        item.textContent = text;
+        item.classList.add("flex", "justify-between", "items-center");
+
+        // isi teks
+        const span = document.createElement('span');
+        span.textContent = text;
+
+        // tombol hapus
+        const btn = document.createElement('button');
+        btn.textContent = "❌";
+        btn.classList.add("ml-2", "text-red-500", "hover:text-red-700", "text-xs");
+        btn.onclick = function () {
+            removeFromSummary(item, harga, hiddenInput);
+        };
+
+        item.appendChild(span);
+        item.appendChild(btn);
         list.appendChild(item);
+
+        // hidden input untuk form
+        const container = document.getElementById('hiddenFields');
+        const hiddenInput = document.createElement('input');
+        hiddenInput.type = 'hidden';
+        hiddenInput.name = fieldName;
+        hiddenInput.value = fieldValue;
+        container.appendChild(hiddenInput);
+
+        // simpan referensi input di item supaya bisa dihapus
+        item._hiddenInput = hiddenInput;
+    }
+
+    function removeFromSummary(item, harga, hiddenInput) {
+        // hapus dari ringkasan
+        item.remove();
+
+        // hapus hidden input
+        if (item._hiddenInput) {
+            item._hiddenInput.remove();
+        }
+
+        // kurangi total
+        total -= harga;
+        if (total < 0) total = 0;
+        document.getElementById('totalHarga').textContent = formatRupiah(total);
+        document.getElementById('totalHargaInput').value = total;
     }
 
     function addHiddenField(name, value) {
